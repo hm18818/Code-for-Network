@@ -1,0 +1,67 @@
+% IoT Sensor Network Connection Simulation
+
+% Parameters
+numNodes = 20;        % Number of sensor nodes
+areaSize = 100;       % Size of the area (m x m)
+commRange = 30;       % Communication range of each node (m)
+
+% Generate random positions for nodes
+nodePositions = areaSize * rand(numNodes, 2);
+
+% Initialize adjacency matrix
+adjacencyMatrix = zeros(numNodes, numNodes);
+
+% Establish connections based on proximity
+for i = 1:numNodes
+    for j = i+1:numNodes
+        distance = norm(nodePositions(i,:) - nodePositions(j,:));
+        if distance <= commRange
+            adjacencyMatrix(i,j) = 1;
+            adjacencyMatrix(j,i) = 1;
+        end
+    end
+end
+
+% Visualize the network
+figure;
+hold on;
+axis([0 areaSize 0 areaSize]);
+title('IoT Sensor Network');
+xlabel('X position (m)');
+ylabel('Y position (m)');
+
+% Plot nodes
+scatter(nodePositions(:,1), nodePositions(:,2), 50, 'filled', 'b');
+
+% Plot connections
+for i = 1:numNodes
+    for j = i+1:numNodes
+        if adjacencyMatrix(i,j) == 1
+            line([nodePositions(i,1) nodePositions(j,1)], ...
+                 [nodePositions(i,2) nodePositions(j,2)], ...
+                 'Color', 'r', 'LineStyle', '-');
+        end
+    end
+end
+
+% Add node labels
+for i = 1:numNodes
+    text(nodePositions(i,1)+2, nodePositions(i,2)+2, num2str(i), ...
+         'FontSize', 8, 'Color', 'k');
+end
+
+hold off;
+
+% Display network statistics
+numConnections = sum(sum(adjacencyMatrix)) / 2;
+avgDegree = mean(sum(adjacencyMatrix));
+
+fprintf('Number of nodes: %d\n', numNodes);
+fprintf('Number of connections: %d\n', numConnections);
+fprintf('Average node degree: %.2f\n', avgDegree);
+
+% Find isolated nodes
+isolatedNodes = find(sum(adjacencyMatrix) == 0);
+fprintf('Isolated nodes: ');
+fprintf('%d ', isolatedNodes);
+fprintf('\n');
