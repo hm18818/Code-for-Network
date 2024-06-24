@@ -1,0 +1,92 @@
+import java.util.*;
+
+class Node {
+    private int id;
+    private List<Node> neighbors;
+    private Queue<String> messageQueue;
+
+    public Node(int id) {
+        this.id = id;
+        this.neighbors = new ArrayList<>();
+        this.messageQueue = new LinkedList<>();
+    }
+
+    public void addNeighbor(Node neighbor) {
+        if (!neighbors.contains(neighbor)) {
+            neighbors.add(neighbor);
+            neighbor.addNeighbor(this);
+        }
+    }
+
+    public void sendMessage(String message, Node destination) {
+        if (neighbors.contains(destination)) {
+            destination.receiveMessage(message);
+            System.out.println("Node " + id + " sent message to Node " + destination.getId() + ": " + message);
+        } else {
+            System.out.println("Node " + id + " cannot send message to Node " + destination.getId() + ": not a neighbor");
+        }
+    }
+
+    public void receiveMessage(String message) {
+        messageQueue.offer(message);
+    }
+
+    public void processMessages() {
+        while (!messageQueue.isEmpty()) {
+            String message = messageQueue.poll();
+            System.out.println("Node " + id + " processing message: " + message);
+        }
+    }
+
+    public int getId() {
+        return id;
+    }
+}
+
+class WirelessSensorNetwork {
+    private List<Node> nodes;
+
+    public WirelessSensorNetwork() {
+        this.nodes = new ArrayList<>();
+    }
+
+    public void addNode(Node node) {
+        nodes.add(node);
+    }
+
+    public void establishConnections() {
+        // For simplicity, we'll connect each node to the next one
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            nodes.get(i).addNeighbor(nodes.get(i + 1));
+        }
+    }
+
+    public void simulateCommunication() {
+        for (int i = 0; i < nodes.size() - 1; i++) {
+            Node sender = nodes.get(i);
+            Node receiver = nodes.get(i + 1);
+            sender.sendMessage("Hello from Node " + sender.getId(), receiver);
+        }
+
+        for (Node node : nodes) {
+            node.processMessages();
+        }
+    }
+}
+
+public class WirelessSensorNetworkDemo {
+    public static void main(String[] args) {
+        WirelessSensorNetwork network = new WirelessSensorNetwork();
+
+        // Create and add nodes
+        for (int i = 0; i < 5; i++) {
+            network.addNode(new Node(i));
+        }
+
+        // Establish connections
+        network.establishConnections();
+
+        // Simulate communication
+        network.simulateCommunication();
+    }
+}
