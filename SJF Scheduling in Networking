@@ -1,0 +1,117 @@
+import java.util.*;
+
+class Process implements Comparable<Process> {
+    int id;
+    int arrivalTime;
+    int burstTime;
+    int remainingTime;
+
+    public Process(int id, int arrivalTime, int burstTime) {
+        this.id = id;
+        this.arrivalTime = arrivalTime;
+        this.burstTime = burstTime;
+        this.remainingTime = burstTime;
+    }
+
+    @Override
+    public int compareTo(Process other) {
+        return Integer.compare(this.remainingTime, other.remainingTime);
+    }
+}
+
+public class ShortestJobFirstScheduler {
+    public static void nonPreemptiveSJF(List<Process> processes) {
+        Collections.sort(processes, Comparator.comparingInt(p -> p.arrivalTime));
+        PriorityQueue<Process> queue = new PriorityQueue<>();
+        List<Process> completed = new ArrayList<>();
+        int currentTime = 0;
+        int i = 0;
+
+        while (completed.size() < processes.size()) {
+            while (i < processes.size() && processes.get(i).arrivalTime <= currentTime) {
+                queue.offer(processes.get(i));
+                i++;
+            }
+
+            if (queue.isEmpty()) {
+                currentTime = processes.get(i).arrivalTime;
+            } else {
+                Process current = queue.poll();
+                currentTime += current.burstTime;
+                current.remainingTime = 0;
+                completed.add(current);
+            }
+        }
+
+        printResults(completed, "Non-Preemptive SJF");
+    }
+
+    public static void preemptiveSJF(List<Process> processes) {
+        Collections.sort(processes, Comparator.comparingInt(p -> p.arrivalTime));
+        PriorityQueue<Process> queue = new PriorityQueue<>();
+        List<Process> completed = new ArrayList<>();
+        int currentTime = 0;
+        int i = 0;
+
+        while (completed.size() < processes.size()) {
+            while (i < processes.size() && processes.get(i).arrivalTime <= currentTime) {
+                queue.offer(processes.get(i));
+                i++;
+            }
+
+            if (queue.isEmpty()) {
+                currentTime = processes.get(i).arrivalTime;
+            } else {
+                Process current = queue.poll();
+                current.remainingTime--;
+                currentTime++;
+
+                if (current.remainingTime == 0) {
+                    completed.add(current);
+                } else {
+                    queue.offer(current);
+                }
+            }
+        }
+
+        printResults(completed, "Preemptive SJF");
+    }
+
+    private static void printResults(List<Process> completed, String algorithm) {
+        System.out.println(algorithm + " Results:");
+        System.out.println("Process\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time");
+        
+        int totalTurnaroundTime = 0;
+        int totalWaitingTime = 0;
+
+        for (Process p : completed) {
+            int completionTime = p.arrivalTime + p.burstTime + (p.remainingTime == 0 ? 0 : p.remainingTime);
+            int turnaroundTime = completionTime - p.arrivalTime;
+            int waitingTime = turnaroundTime - p.burstTime;
+
+            totalTurnaroundTime += turnaroundTime;
+            totalWaitingTime += waitingTime;
+
+            System.out.printf("P%d\t%d\t\t%d\t\t%d\t\t%d\t\t\t%d\n",
+                    p.id, p.arrivalTime, p.burstTime, completionTime, turnaroundTime, waitingTime);
+        }
+
+        double avgTurnaroundTime = (double) totalTurnaroundTime / completed.size();
+        double avgWaitingTime = (double) totalWaitingTime / completed.size();
+
+        System.out.printf("Average Turnaround Time: %.2f\n", avgTurnaroundTime);
+        System.out.printf("Average Waiting Time: %.2f\n\n", avgWaitingTime);
+    }
+
+    public static void main(String[] args) {
+        List<Process> processes = Arrays.asList(
+            new Process(1, 0, 6),
+            new Process(2, 1, 8),
+            new Process(3, 2, 7),
+            new Process(4, 3, 3)
+        );
+
+        nonPreemptiveSJF(new ArrayList<>(processes));
+        preemptiveSJF(new ArrayList<>(processes));
+    }
+}
