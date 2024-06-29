@@ -1,0 +1,84 @@
+function dijkstra_complexity()
+    % Define range of graph sizes to test
+    sizes = 10:10:100;
+    times = zeros(size(sizes));
+    
+    % Run Dijkstra's algorithm for each graph size
+    for i = 1:length(sizes)
+        n = sizes(i);
+        
+        % Generate a random graph
+        graph = generate_random_graph(n);
+        
+        % Measure execution time
+        tic;
+        dijkstra(graph, 1);
+        times(i) = toc;
+        
+        fprintf('Nodes: %d, Time: %.6f seconds\n', n, times(i));
+    end
+    
+    % Plot results
+    figure;
+    plot(sizes, times, 'b-o');
+    xlabel('Number of Nodes');
+    ylabel('Execution Time (seconds)');
+    title('Dijkstra''s Algorithm Complexity');
+    
+    % Fit a quadratic curve (O(n^2))
+    p = polyfit(sizes, times, 2);
+    hold on;
+    plot(sizes, polyval(p, sizes), 'r--');
+    legend('Measured Time', 'Quadratic Fit');
+    
+    % Display complexity analysis
+    fprintf('\nComplexity Analysis:\n');
+    fprintf('Theoretical complexity: O(n^2)\n');
+    fprintf('Empirical complexity: approximately O(n^%.2f)\n', log(times(end)/times(1)) / log(sizes(end)/sizes(1)));
+end
+
+function graph = generate_random_graph(n)
+    % Generate a random adjacency matrix
+    graph = rand(n);
+    
+    % Make the graph symmetric (undirected)
+    graph = triu(graph) + triu(graph, 1)';
+    
+    % Set diagonal to infinity (no self-loops)
+    graph(1:n+1:end) = inf;
+    
+    % Ensure connectivity by connecting each node to the next
+    for i = 1:n-1
+        graph(i, i+1) = rand();
+        graph(i+1, i) = graph(i, i+1);
+    end
+end
+
+function [dist, path] = dijkstra(graph, start)
+    n = size(graph, 1);
+    dist = inf(1, n);
+    dist(start) = 0;
+    visited = false(1, n);
+    path = zeros(1, n);
+    
+    for i = 1:n
+        % Find the unvisited node with minimum distance
+        [~, u] = min(dist(~visited));
+        u = find(~visited, u, 'first');
+        u = u(end);
+        
+        % Mark as visited
+        visited(u) = true;
+        
+        % Update distances to neighbors
+        for v = 1:n
+            if ~visited(v) && graph(u, v) < inf
+                alt = dist(u) + graph(u, v);
+                if alt < dist(v)
+                    dist(v) = alt;
+                    path(v) = u;
+                end
+            end
+        end
+    end
+end
