@@ -1,0 +1,80 @@
+% Smart Parking System
+
+% Initialize parking lot
+parking_spaces = 100;
+occupied_spaces = zeros(1, parking_spaces);
+
+% Main loop
+while true
+    disp('1: Park a car');
+    disp('2: Remove a car');
+    disp('3: View parking status');
+    disp('4: Plot parking status');
+    disp('5: Exit');
+    choice = input('Enter your choice: ');
+    
+    switch choice
+        case 1
+            [occupied_spaces, ~] = park_car(occupied_spaces);
+        case 2
+            space = input('Enter the space number: ');
+            occupied_spaces = remove_car(occupied_spaces, space);
+        case 3
+            disp(['Occupied spaces: ', num2str(sum(occupied_spaces))]);
+            disp(['Available spaces: ', num2str(parking_spaces - sum(occupied_spaces))]);
+        case 4
+            plot_parking_status(occupied_spaces);
+        case 5
+            break;
+        otherwise
+            disp('Invalid choice');
+    end
+end
+
+% Function definitions below
+
+function space = find_available_space(occupied_spaces)
+    space = find(occupied_spaces == 0, 1);
+    if isempty(space)
+        space = -1;
+    end
+end
+
+function [occupied_spaces, space] = park_car(occupied_spaces)
+    space = find_available_space(occupied_spaces);
+    if space ~= -1
+        occupied_spaces(space) = 1;
+        disp(['Car parked in space ', num2str(space)]);
+    else
+        disp('Parking lot is full');
+    end
+end
+
+function occupied_spaces = remove_car(occupied_spaces, space)
+    if occupied_spaces(space) == 1
+        occupied_spaces(space) = 0;
+        disp(['Car removed from space ', num2str(space)]);
+    else
+        disp('No car in this space');
+    end
+end
+
+function plot_parking_status(occupied_spaces)
+    figure;
+    imagesc(reshape(occupied_spaces, 10, []));
+    colormap([0.8 1 0.8; 1 0.4 0.4]); % Green for empty, Red for occupied
+    title('Parking Lot Status');
+    xlabel('Parking Space Column');
+    ylabel('Parking Space Row');
+    
+    % Add text labels
+    [rows, cols] = size(reshape(occupied_spaces, 10, []));
+    for i = 1:rows
+        for j = 1:cols
+            space_num = (j-1)*10 + i;
+            text(j, i, num2str(space_num), 'HorizontalAlignment', 'center', 'Color', 'k');
+        end
+    end
+    
+    colorbar('Ticks', [0.25, 0.75], 'TickLabels', {'Available', 'Occupied'});
+end
