@@ -1,0 +1,99 @@
+% Network Topology Performance Comparison
+
+% Define network sizes to test
+network_sizes = 10:10:100;
+
+% Initialize performance matrices
+efficiency = zeros(length(network_sizes), 5);
+time_complexity = zeros(length(network_sizes), 5);
+space_complexity = zeros(length(network_sizes), 5);
+
+% Simulate networks and measure performance
+for i = 1:length(network_sizes)
+    n = network_sizes(i);
+    
+    % BUS topology
+    [efficiency(i, 1), time_complexity(i, 1), space_complexity(i, 1)] = simulate_bus(n);
+    
+    % STAR topology
+    [efficiency(i, 2), time_complexity(i, 2), space_complexity(i, 2)] = simulate_star(n);
+    
+    % MESH topology
+    [efficiency(i, 3), time_complexity(i, 3), space_complexity(i, 3)] = simulate_mesh(n);
+    
+    % TREE topology
+    [efficiency(i, 4), time_complexity(i, 4), space_complexity(i, 4)] = simulate_tree(n);
+    
+    % GRAPH topology
+    [efficiency(i, 5), time_complexity(i, 5), space_complexity(i, 5)] = simulate_graph(n);
+end
+
+% Plot results
+topologies = {'BUS', 'STAR', 'MESH', 'TREE', 'GRAPH'};
+colors = {'r', 'g', 'b', 'm', 'c'};
+
+figure;
+
+% Efficiency plot
+subplot(3, 1, 1);
+for j = 1:5
+    plot(network_sizes, efficiency(:, j), colors{j}, 'LineWidth', 2);
+    hold on;
+end
+title('Network Efficiency');
+xlabel('Network Size');
+ylabel('Efficiency');
+legend(topologies);
+
+% Time Complexity plot
+subplot(3, 1, 2);
+for j = 1:5
+    plot(network_sizes, time_complexity(:, j), colors{j}, 'LineWidth', 2);
+    hold on;
+end
+title('Time Complexity');
+xlabel('Network Size');
+ylabel('Time (ms)');
+legend(topologies);
+
+% Space Complexity plot
+subplot(3, 1, 3);
+for j = 1:5
+    plot(network_sizes, space_complexity(:, j), colors{j}, 'LineWidth', 2);
+    hold on;
+end
+title('Space Complexity');
+xlabel('Network Size');
+ylabel('Memory Usage (KB)');
+legend(topologies);
+
+% Simulation functions for each topology
+function [eff, time, space] = simulate_bus(n)
+    eff = 1 / log(n);
+    time = n;
+    space = n;
+end
+
+function [eff, time, space] = simulate_star(n)
+    eff = 1 / 2;
+    time = log(n);
+    space = n;
+end
+
+function [eff, time, space] = simulate_mesh(n)
+    eff = 1;
+    time = sqrt(n);
+    space = n^2;
+end
+
+function [eff, time, space] = simulate_tree(n)
+    eff = 1 / log(log(n));
+    time = log(n);
+    space = n * log(n);
+end
+
+function [eff, time, space] = simulate_graph(n)
+    eff = 1 / log(log(n));
+    time = log(n);
+    space = n * sqrt(n);
+end
