@@ -1,0 +1,99 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class OSIModelDataProcessing {
+
+    public static void main(String[] args) {
+        String data = "Hello, World!";
+        processDataThroughOSILayers(data);
+    }
+
+    public static void processDataThroughOSILayers(String data) {
+        // Application Layer (Layer 7)
+        String applicationData = applicationLayer(data);
+
+        // Presentation Layer (Layer 6)
+        byte[] presentationData = presentationLayer(applicationData);
+
+        // Session Layer (Layer 5)
+        byte[] sessionData = sessionLayer(presentationData);
+
+        // Transport Layer (Layer 4)
+        List<byte[]> segments = transportLayer(sessionData);
+
+        // Network Layer (Layer 3)
+        List<byte[]> packets = networkLayer(segments);
+
+        // Data Link Layer (Layer 2)
+        List<byte[]> frames = dataLinkLayer(packets);
+
+        // Physical Layer (Layer 1)
+        String binaryData = physicalLayer(frames);
+
+        System.out.println("Final binary data: " + binaryData);
+    }
+
+    private static String applicationLayer(String data) {
+        System.out.println("Application Layer: Preparing data for transmission");
+        return data;
+    }
+
+    private static byte[] presentationLayer(String data) {
+        System.out.println("Presentation Layer: Encoding and encrypting data");
+        return data.getBytes();
+    }
+
+    private static byte[] sessionLayer(byte[] data) {
+        System.out.println("Session Layer: Managing session");
+        return data; // In this example, we're not modifying the data
+    }
+
+    private static List<byte[]> transportLayer(byte[] data) {
+        System.out.println("Transport Layer: Segmenting data");
+        List<byte[]> segments = new ArrayList<>();
+        int segmentSize = 5;
+        for (int i = 0; i < data.length; i += segmentSize) {
+            int length = Math.min(segmentSize, data.length - i);
+            byte[] segment = new byte[length];
+            System.arraycopy(data, i, segment, 0, length);
+            segments.add(segment);
+        }
+        return segments;
+    }
+
+    private static List<byte[]> networkLayer(List<byte[]> segments) {
+        System.out.println("Network Layer: Adding IP headers");
+        List<byte[]> packets = new ArrayList<>();
+        for (byte[] segment : segments) {
+            byte[] packet = new byte[segment.length + 1];
+            packet[0] = (byte) 0xFF; // Simulating IP header
+            System.arraycopy(segment, 0, packet, 1, segment.length);
+            packets.add(packet);
+        }
+        return packets;
+    }
+
+    private static List<byte[]> dataLinkLayer(List<byte[]> packets) {
+        System.out.println("Data Link Layer: Adding MAC addresses");
+        List<byte[]> frames = new ArrayList<>();
+        for (byte[] packet : packets) {
+            byte[] frame = new byte[packet.length + 2];
+            frame[0] = (byte) 0xAA; // Simulating source MAC address
+            frame[1] = (byte) 0xBB; // Simulating destination MAC address
+            System.arraycopy(packet, 0, frame, 2, packet.length);
+            frames.add(frame);
+        }
+        return frames;
+    }
+
+    private static String physicalLayer(List<byte[]> frames) {
+        System.out.println("Physical Layer: Converting to binary");
+        StringBuilder binaryData = new StringBuilder();
+        for (byte[] frame : frames) {
+            for (byte b : frame) {
+                binaryData.append(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0'));
+            }
+        }
+        return binaryData.toString();
+    }
+}
