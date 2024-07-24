@@ -1,4 +1,4 @@
-% PE-LEACH Protocol Implementation
+% PE-LEACH Protocol Implementation for WSN
 
 % Network parameters
 n = 100;          % Number of nodes
